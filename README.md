@@ -21,9 +21,9 @@ To test it
 | 2 | Unique ID Generation | Done |
 | 3a | Broadcast: Single-Node | Done |
 | 3b | Broadcast: Multi-Node | Done |
-| 3c | Broadcast: Fault Tolerant | Pending |
-| 3d | Broadcast: Efficient, Part I | Pending |
-| 3e | Broadcast: Efficient, Part II | Pending |
+| 3c | Broadcast: Fault Tolerant | Done |
+| 3d | Broadcast: Efficient, Part I | Done |
+| 3e | Broadcast: Efficient, Part II | Done |
 | 4 | Grow-Only Counter | Pending |
 | 5a | Kafka-Style Log: Single-Node | Pending |
 | 5b | Kafka-Style Log: Multi-Node | Pending |

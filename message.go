@@ -25,10 +25,11 @@ func (bmb *broadcastmessagebucket) AddMessage(message int) {
 
 func (bmb *broadcastmessagebucket) GetAllMessages() []int {
 	messages := []int{}
-
+   bmb.Lock()
 	for k, _ := range bmb.messages {
 		messages = append(messages, k)
 	}
+	bmb.Unlock()
 
 	// return all messages for read RPC
 	return messages
