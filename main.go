@@ -1,23 +1,35 @@
 package main
 
 import (
-    "encoding/json"
-    "log"
+	"context"
+	"encoding/json"
+	"log"
 
-    maelstrom "github.com/jepsen-io/maelstrom/demo/go"
-     "github.com/google/uuid"
 	"fmt"
 
+	"github.com/google/uuid"
+	maelstrom "github.com/jepsen-io/maelstrom/demo/go"
 )
 
 
 
 func main() {
 
+	ctx,cancel := context.WithCancel(context.Background())
+	// buffered channel to handle backpressure
+   messageChan := make(chan int,100)
+
 
 n := maelstrom.NewNode()
 
 broadcastMessageNums := []int{}
+
+	forwarder := NewForwarder(ctx ,messageChan)	
+	// broadcaster
+	go forwarder.run(ctx)
+
+	broadcastmessagebucket := Newbroadcastmessagebucket(messageChan)
+
 
 n.Handle("broadcast", func(msg maelstrom.Message) error {
 
@@ -38,6 +50,7 @@ n.Handle("broadcast", func(msg maelstrom.Message) error {
 			if message != nil {
 					if num, ok := message.(float64); ok {
 									broadcastMessageNums = append(broadcastMessageNums, int(num))
+					         broadcastmessagebucket.AddMessage(int(num))
 							}
 			}
 				body["type"] = "broadcast_ok"
@@ -46,7 +59,8 @@ n.Handle("broadcast", func(msg maelstrom.Message) error {
 
 			case "read":
 				body["type"] = "read_ok"
-				body["messages"] = broadcastMessageNums
+				// body["messages"] = broadcastMessageNums
+				body["messages"] = broadcastmessagebucket.GetAllMessages()
 
 			case "topology":
 				body["type"] = "topology_ok"
@@ -72,6 +86,7 @@ n.Handle("read", func(msg maelstrom.Message) error {
 
     return n.Reply(msg, body)
 	})
+
 n.Handle("topology", func(msg maelstrom.Message) error {
 
 // Unmarshal the message body as an loosely-typed map.
@@ -79,6 +94,8 @@ n.Handle("topology", func(msg maelstrom.Message) error {
     if err := json.Unmarshal(msg.Body, &body); err != nil {
         return err
     }
+
+		log.Printf("oneplus topology: %v", body["topology"])
 
     body["type"] = "topology_ok"
 		delete(body,"topology")
@@ -123,9 +140,13 @@ n.Handle("echo", func(msg maelstrom.Message) error {
 
 	
 if err := n.Run(); err != nil {
+		cancel()
     log.Fatal(err)
 }
 
+	cancel()
 
 
 }
+
+// func getNeighBourNodes()
