@@ -1,18 +1,24 @@
 package main
 
-type broadcastmessagebucket struct{
-	messages map[int]int
+import "sync"
+
+type broadcastmessagebucket struct {
+	sync.Mutex
+	messages      map[int]int
 	broadcastChan chan<- int
 }
 
-
-func (bmb *broadcastmessagebucket) AddMessage(message int){
+func (bmb *broadcastmessagebucket) AddMessage(message int) {
+	bmb.Lock()
 	_, ok := bmb.messages[message]
 	if ok {
-   // exists ignore
+		// exists ignore
+	  bmb.Unlock()
 		return
 	}
 	bmb.messages[message] = 1
+	// release the lock before sending the message
+	bmb.Unlock()
 	// send message to forwarder which broadcasts requests
 	bmb.broadcastChan <- message
 }
@@ -20,7 +26,7 @@ func (bmb *broadcastmessagebucket) AddMessage(message int){
 func (bmb *broadcastmessagebucket) GetAllMessages() []int {
 	messages := []int{}
 
-	for k,_ := range bmb.messages{
+	for k, _ := range bmb.messages {
 		messages = append(messages, k)
 	}
 
@@ -29,9 +35,9 @@ func (bmb *broadcastmessagebucket) GetAllMessages() []int {
 }
 
 func Newbroadcastmessagebucket(broadcastChan chan<- int) *broadcastmessagebucket {
-     bucket := &broadcastmessagebucket{
-			messages: make(map[int]int),
+	bucket := &broadcastmessagebucket{
+		messages:      make(map[int]int),
 		broadcastChan: broadcastChan,
 	}
-   return bucket
+	return bucket
 }

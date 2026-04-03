@@ -2,15 +2,14 @@ package main
 
 import (
 	"context"
+	maelstrom "github.com/jepsen-io/maelstrom/demo/go"
 	"sync"
-    maelstrom "github.com/jepsen-io/maelstrom/demo/go"
 )
-
 
 type forwader struct {
 	incomingMessage <-chan int
 
-	 *maelstrom.Node
+	*maelstrom.Node
 
 	sync.Mutex
 	neighbours []string
@@ -21,19 +20,22 @@ func (f *forwader) run(ctx context.Context) {
 
 	for {
 
-		select{
-		
+		select {
+
 		case message := <-f.incomingMessage:
-		// broadcast to neighbours only
-			for _,node := range f.neighbours {
-       // send or rpc call to neighbours
-				f.Send(node,message)
+			// broadcast to neighbours only
+			for _, node := range f.neighbours {
+				// send or rpc call to neighbours
+				body := map[string]any{}
+				body["type"] = "broadcast"
+				body["message"] = message
+				f.Send(node, body)
 			}
-		continue
+			continue
 
 		case <-ctx.Done():
-		// exit
-     return
+			// exit
+			return
 		}
 
 	}
@@ -46,16 +48,14 @@ func (f *forwader) UpdateNeighbours(neighbours []string) {
 	f.Unlock()
 }
 
-func NewForwarder(ctx context.Context, senderChan <-chan int) *forwader {
-	
+func NewForwarder(ctx context.Context, senderChan <-chan int, node *maelstrom.Node) *forwader {
+
 	forwarder := &forwader{
 		incomingMessage: senderChan,
-		neighbours: make([]string, 0),
+		neighbours:      make([]string, 0),
+		Node:            node,
 	}
-	 
 
 	// return send only channel and forwarder
 	return forwarder
 }
-
-
