@@ -25,7 +25,7 @@ To test it
 | 3d | Broadcast: Efficient, Part I | Done |
 | 3e | Broadcast: Efficient, Part II | Done |
 | 4 | Grow-Only Counter | Done |
-| 5a | Kafka-Style Log: Single-Node | Pending |
+| 5a | Kafka-Style Log: Single-Node | Done |
 | 5b | Kafka-Style Log: Multi-Node | Pending |
 | 5c | Kafka-Style Log: Efficient | Pending |
 | 6a | Transactions: Single-Node | Pending |
