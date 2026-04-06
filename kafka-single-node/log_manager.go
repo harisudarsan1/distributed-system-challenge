@@ -4,10 +4,6 @@ import (
 	"sync"
 )
 
-// type LogMsg struct {
-// 	key     string
-// 	message int
-// }
 
 type Log struct {
 	messages         []int
@@ -20,20 +16,6 @@ type LogManager struct {
 	logs map[string]Log
 }
 
-type PollMsg struct {
-	key    string
-	offset int
-}
-
-type PollReply struct {
-	key               string
-	messageWithOffset [][]int
-}
-
-type commitMsg struct {
-	key    string
-	offset int
-}
 
 // Send will receive the message and returns the offset of the stored message
 func (lm *LogManager) Send(key string, message int) int {
@@ -73,28 +55,17 @@ func (lm *LogManager) Poll(pollMsgs map[string]int) map[string][][]int {
 		lm.Unlock()
 
 		if !ok {
-			// plr := PollReply{
-			// 	key:               pm.key,
-			// 	messageWithOffset: [][]int{},
-			// }
 
 			plReplies[key] = [][]int{}
 
 		} else {
 			msgsWithOffset := make([][]int, 0)
-			// msgs := logg.messages[pm.offset:]
-			// add the offset+message value in the array
 			for i := offset; i < logg.totalLen; i++ {
 				msgsWithOffset = append(msgsWithOffset, []int{i, logg.messages[i]})
 			}
-			// plr := PollReply{
-			// 	key:               pm.key,
-			// 	messageWithOffset: msgsWithOffset,
-			// }
 			plReplies[key] = msgsWithOffset
 
 		}
-
 	}
 
 	return plReplies
