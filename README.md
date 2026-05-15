@@ -1,5 +1,6 @@
 # My solutions for fly.io distributed systems challenges
-I have written every piece of code by myself no ai agents are used for writing the code as this is for brainstroming purposes.
+This repo contains my solutions to fly.io distributed systems challenges. No AI agents are used to solve the problems as this is meant for learning purposes
+
 
 To test it 
 
